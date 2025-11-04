@@ -1,0 +1,1361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Café Event Ticketing</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <style>
+        :root {
+            --primary: #8B4513;
+            --primary-light: #A0522D;
+            --secondary: #D2691E;
+            --accent: #CD853F;
+            --light: #F5F5DC;
+            --dark: #3E2723;
+            --success: #4CAF50;
+            --warning: #FF9800;
+            --danger: #F44336;
+            --gray: #9E9E9E;
+            --gray-light: #E0E0E0;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --radius: 12px;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        body {
+            background-color: #f9f9f9;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            padding: 1.5rem 0;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .logo i {
+            font-size: 1.8rem;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius);
+            transition: var(--transition);
+        }
+
+        nav a:hover, nav a.active {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.7rem 1.5rem;
+            border: none;
+            border-radius: var(--radius);
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid white;
+            color: white;
+        }
+
+        .btn-outline:hover {
+            background-color: white;
+            color: var(--primary);
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .btn-warning {
+            background-color: var(--warning);
+            color: white;
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .hero {
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1554118811-1e0d58224f24?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1447&q=80');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            padding: 5rem 0;
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto 2rem;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+            color: var(--dark);
+            position: relative;
+        }
+
+        .section-title:after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 4px;
+            background-color: var(--secondary);
+            margin: 0.5rem auto;
+            border-radius: 2px;
+        }
+
+        .events-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .event-card {
+            background-color: white;
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .event-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .event-image {
+            height: 200px;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .event-content {
+            padding: 1.5rem;
+        }
+
+        .event-date {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .event-title {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .event-description {
+            color: var(--gray);
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .event-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .event-price {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--primary);
+        }
+
+        .dashboard {
+            display: none;
+            padding: 2rem 0;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        .charts-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-card {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        .chart-title {
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+            color: var(--dark);
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--gray-light);
+            margin-bottom: 1.5rem;
+        }
+
+        .tab {
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: var(--transition);
+        }
+
+        .tab.active {
+            border-bottom: 3px solid var(--secondary);
+            color: var(--secondary);
+            font-weight: 500;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--gray-light);
+        }
+
+        th {
+            background-color: #f5f5f5;
+            font-weight: 500;
+        }
+
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        .status {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-completed {
+            background-color: #E8F5E9;
+            color: var(--success);
+        }
+
+        .status-pending {
+            background-color: #FFF3E0;
+            color: var(--warning);
+        }
+
+        .status-cancelled {
+            background-color: #FFEBEE;
+            color: var(--danger);
+        }
+
+        .qr-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .qr-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: var(--radius);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .qr-code {
+            margin: 1.5rem auto;
+            width: 200px;
+            height: 200px;
+            background-color: white;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .payment-instructions {
+            margin: 1rem 0;
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+
+        .login-modal, .booking-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: var(--radius);
+            width: 90%;
+            max-width: 500px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid var(--gray-light);
+            border-radius: var(--radius);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            border-color: var(--secondary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(210, 105, 30, 0.2);
+        }
+
+        .seat-selection {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .seat {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--gray-light);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .seat.selected {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .seat.occupied {
+            background-color: var(--danger);
+            color: white;
+            cursor: not-allowed;
+        }
+
+        .booking-summary {
+            background-color: #f9f9f9;
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            margin: 1.5rem 0;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.8rem;
+        }
+
+        .summary-total {
+            font-weight: 700;
+            font-size: 1.2rem;
+            border-top: 1px solid var(--gray-light);
+            padding-top: 0.8rem;
+        }
+
+        footer {
+            background-color: var(--dark);
+            color: white;
+            padding: 3rem 0 2rem;
+            margin-top: 4rem;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h3 {
+            margin-bottom: 1.5rem;
+            font-size: 1.2rem;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.8rem;
+        }
+
+        .footer-links a {
+            color: var(--gray-light);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .footer-links a:hover {
+            color: white;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .social-links a {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 40px;
+            height: 40px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            color: white;
+            transition: var(--transition);
+        }
+
+        .social-links a:hover {
+            background-color: var(--secondary);
+            transform: translateY(-3px);
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--gray-light);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            nav ul {
+                gap: 1rem;
+            }
+            
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+            
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .auth-buttons {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container header-content">
+            <div class="logo">
+                <i class="fas fa-mug-hot"></i>
+                <span>Café Events</span>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#" class="active">Home</a></li>
+                    <li><a href="#">Events</a></li>
+                    <li><a href="#">Menu</a></li>
+                    <li><a href="#">About</a></li>
+                    <li><a href="#">Contact</a></li>
+                </ul>
+            </nav>
+            <div class="auth-buttons">
+                <button class="btn btn-outline" id="loginBtn">Login</button>
+                <button class="btn btn-primary" id="adminBtn">Admin Dashboard</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1>Experience Unforgettable Café Events</h1>
+            <p>Book tickets for exclusive coffee tastings, live music, and culinary workshops. Enjoy seamless QRIS payments and instant confirmations.</p>
+            <button class="btn btn-primary">Explore Events <i class="fas fa-arrow-right"></i></button>
+        </div>
+    </section>
+
+    <!-- Events Section -->
+    <section class="container">
+        <h2 class="section-title">Upcoming Events</h2>
+        <div class="events-grid">
+            <!-- Event 1 -->
+            <div class="event-card">
+                <div class="event-image" style="background-image: url('https://images.unsplash.com/photo-1518837695005-2083093ee35b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80');"></div>
+                <div class="event-content">
+                    <div class="event-date">
+                        <i class="far fa-calendar"></i>
+                        <span>June 15, 2023 • 7:00 PM</span>
+                    </div>
+                    <h3 class="event-title">Coffee Tasting Masterclass</h3>
+                    <p class="event-description">Join our expert baristas for an immersive coffee tasting experience. Learn about different brewing methods and flavor profiles.</p>
+                    <div class="event-footer">
+                        <div class="event-price">IDR 150,000</div>
+                        <button class="btn btn-primary book-btn" data-event="Coffee Tasting Masterclass" data-price="150000">Book Now</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Event 2 -->
+            <div class="event-card">
+                <div class="event-image" style="background-image: url('https://images.unsplash.com/photo-1470225620780-dba8ba36b745?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80');"></div>
+                <div class="event-content">
+                    <div class="event-date">
+                        <i class="far fa-calendar"></i>
+                        <span>June 22, 2023 • 8:00 PM</span>
+                    </div>
+                    <h3 class="event-title">Acoustic Night</h3>
+                    <p class="event-description">Relax with live acoustic performances by local artists while enjoying our specialty drinks and desserts.</p>
+                    <div class="event-footer">
+                        <div class="event-price">IDR 100,000</div>
+                        <button class="btn btn-primary book-btn" data-event="Acoustic Night" data-price="100000">Book Now</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Event 3 -->
+            <div class="event-card">
+                <div class="event-image" style="background-image: url('https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80');"></div>
+                <div class="event-content">
+                    <div class="event-date">
+                        <i class="far fa-calendar"></i>
+                        <span>June 29, 2023 • 6:30 PM</span>
+                    </div>
+                    <h3 class="event-title">Latte Art Workshop</h3>
+                    <p class="event-description">Learn the art of creating beautiful latte designs from our champion barista. All materials provided.</p>
+                    <div class="event-footer">
+                        <div class="event-price">IDR 200,000</div>
+                        <button class="btn btn-primary book-btn" data-event="Latte Art Workshop" data-price="200000">Book Now</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Admin Dashboard -->
+    <section class="dashboard container" id="dashboard">
+        <div class="dashboard-header">
+            <h2>Admin Dashboard</h2>
+            <button class="btn btn-primary" id="backToHome">
+                <i class="fas fa-arrow-left"></i> Back to Home
+            </button>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">IDR 5,250,000</div>
+                <div class="stat-label">Total Revenue</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">42</div>
+                <div class="stat-label">Tickets Sold</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">78%</div>
+                <div class="stat-label">Occupancy Rate</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">3.8</div>
+                <div class="stat-label">Avg. Rating</div>
+            </div>
+        </div>
+
+        <div class="charts-container">
+            <div class="chart-card">
+                <h3 class="chart-title">Sales Overview</h3>
+                <canvas id="salesChart"></canvas>
+            </div>
+            <div class="chart-card">
+                <h3 class="chart-title">Payment Methods</h3>
+                <canvas id="paymentChart"></canvas>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" data-tab="transactions">Transactions</div>
+            <div class="tab" data-tab="events">Events</div>
+            <div class="tab" data-tab="menu">Menu Items</div>
+        </div>
+
+        <div class="tab-content active" id="transactions">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Customer</th>
+                            <th>Event</th>
+                            <th>Amount</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>#TRX-001</td>
+                            <td>John Doe</td>
+                            <td>Coffee Tasting</td>
+                            <td>IDR 150,000</td>
+                            <td>Jun 10, 2023</td>
+                            <td><span class="status status-completed">Completed</span></td>
+                        </tr>
+                        <tr>
+                            <td>#TRX-002</td>
+                            <td>Jane Smith</td>
+                            <td>Acoustic Night</td>
+                            <td>IDR 100,000</td>
+                            <td>Jun 11, 2023</td>
+                            <td><span class="status status-completed">Completed</span></td>
+                        </tr>
+                        <tr>
+                            <td>#TRX-003</td>
+                            <td>Robert Brown</td>
+                            <td>Latte Art Workshop</td>
+                            <td>IDR 200,000</td>
+                            <td>Jun 12, 2023</td>
+                            <td><span class="status status-pending">Pending</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="tab-content" id="events">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Event Name</th>
+                            <th>Date</th>
+                            <th>Tickets Sold</th>
+                            <th>Revenue</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Coffee Tasting Masterclass</td>
+                            <td>Jun 15, 2023</td>
+                            <td>18/25</td>
+                            <td>IDR 2,700,000</td>
+                            <td>
+                                <button class="btn btn-primary"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-danger"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Acoustic Night</td>
+                            <td>Jun 22, 2023</td>
+                            <td>15/30</td>
+                            <td>IDR 1,500,000</td>
+                            <td>
+                                <button class="btn btn-primary"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-danger"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Latte Art Workshop</td>
+                            <td>Jun 29, 2023</td>
+                            <td>9/15</td>
+                            <td>IDR 1,800,000</td>
+                            <td>
+                                <button class="btn btn-primary"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-danger"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="tab-content" id="menu">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Item Name</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Popularity</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Specialty Cold Brew</td>
+                            <td>Drinks</td>
+                            <td>IDR 45,000</td>
+                            <td>High</td>
+                            <td>
+                                <button class="btn btn-primary"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-danger"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Avocado Toast</td>
+                            <td>Food</td>
+                            <td>IDR 55,000</td>
+                            <td>Medium</td>
+                            <td>
+                                <button class="btn btn-primary"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-danger"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Tiramisu</td>
+                            <td>Dessert</td>
+                            <td>IDR 40,000</td>
+                            <td>High</td>
+                            <td>
+                                <button class="btn btn-primary"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-danger"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- QR Payment Modal -->
+    <div class="qr-modal" id="qrModal">
+        <div class="qr-content">
+            <div class="modal-header">
+                <h3>Pay with QRIS</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <p>Scan the QR code below with your banking app to complete payment</p>
+            <div class="qr-code" id="qrCode"></div>
+            <p class="payment-instructions">Open your banking app, select QRIS payment, and scan the code above</p>
+            <div class="booking-summary">
+                <div class="summary-item">
+                    <span>Event:</span>
+                    <span id="summaryEvent">Coffee Tasting Masterclass</span>
+                </div>
+                <div class="summary-item">
+                    <span>Tickets:</span>
+                    <span id="summaryTickets">1</span>
+                </div>
+                <div class="summary-item summary-total">
+                    <span>Total:</span>
+                    <span id="summaryTotal">IDR 150,000</span>
+                </div>
+            </div>
+            <button class="btn btn-success" id="confirmPayment">
+                <i class="fas fa-check"></i> Confirm Payment
+            </button>
+        </div>
+    </div>
+
+    <!-- Booking Modal -->
+    <div class="booking-modal" id="bookingModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Book Your Ticket</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="bookingForm">
+                <div class="form-group">
+                    <label for="eventName">Event</label>
+                    <input type="text" class="form-control" id="eventName" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="ticketCount">Number of Tickets</label>
+                    <select class="form-control" id="ticketCount">
+                        <option value="1">1 Ticket</option>
+                        <option value="2">2 Tickets</option>
+                        <option value="3">3 Tickets</option>
+                        <option value="4">4 Tickets</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Seat Selection</label>
+                    <div class="seat-selection" id="seatSelection">
+                        <!-- Seats will be generated dynamically -->
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="customerName">Full Name</label>
+                    <input type="text" class="form-control" id="customerName" required>
+                </div>
+                <div class="form-group">
+                    <label for="customerEmail">Email</label>
+                    <input type="email" class="form-control" id="customerEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="customerPhone">Phone Number</label>
+                    <input type="tel" class="form-control" id="customerPhone" required>
+                </div>
+                <div class="booking-summary">
+                    <div class="summary-item">
+                        <span>Event:</span>
+                        <span id="bookingEvent">Coffee Tasting Masterclass</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Tickets:</span>
+                        <span id="bookingTickets">1</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Price per ticket:</span>
+                        <span id="bookingPrice">IDR 150,000</span>
+                    </div>
+                    <div class="summary-item summary-total">
+                        <span>Total:</span>
+                        <span id="bookingTotal">IDR 150,000</span>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-primary" id="proceedToPayment">
+                    Proceed to Payment <i class="fas fa-arrow-right"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div class="login-modal" id="loginModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Admin Login</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" class="form-control" id="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" class="form-control" id="password" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Café Events</h3>
+                    <p>Creating memorable experiences through exceptional coffee and community events.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-whatsapp"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Home</a></li>
+                        <li><a href="#">Events</a></li>
+                        <li><a href="#">Menu</a></li>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Contact Info</h3>
+                    <ul class="footer-links">
+                        <li><i class="fas fa-map-marker-alt"></i> 123 Coffee Street, Jakarta</li>
+                        <li><i class="fas fa-phone"></i> +62 21 1234 5678</li>
+                        <li><i class="fas fa-envelope"></i> info@cafeevents.com</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                &copy; 2023 Café Events. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // DOM Elements
+        const adminBtn = document.getElementById('adminBtn');
+        const backToHome = document.getElementById('backToHome');
+        const dashboard = document.getElementById('dashboard');
+        const loginBtn = document.getElementById('loginBtn');
+        const loginModal = document.getElementById('loginModal');
+        const bookingModal = document.getElementById('bookingModal');
+        const qrModal = document.getElementById('qrModal');
+        const closeModals = document.querySelectorAll('.close-modal');
+        const bookBtns = document.querySelectorAll('.book-btn');
+        const proceedToPayment = document.getElementById('proceedToPayment');
+        const confirmPayment = document.getElementById('confirmPayment');
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const ticketCount = document.getElementById('ticketCount');
+        const seatSelection = document.getElementById('seatSelection');
+        const loginForm = document.getElementById('loginForm');
+
+        // Event Data
+        let currentEvent = {
+            name: '',
+            price: 0,
+            tickets: 1,
+            selectedSeats: []
+        };
+
+        // Initialize the application
+        function initApp() {
+            // Generate seats
+            generateSeats();
+            
+            // Set up event listeners
+            setupEventListeners();
+            
+            // Initialize charts
+            initCharts();
+        }
+
+        // Set up event listeners
+        function setupEventListeners() {
+            // Admin dashboard toggle
+            adminBtn.addEventListener('click', showDashboard);
+            backToHome.addEventListener('click', hideDashboard);
+            
+            // Modal controls
+            loginBtn.addEventListener('click', () => showModal(loginModal));
+            closeModals.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    loginModal.style.display = 'none';
+                    bookingModal.style.display = 'none';
+                    qrModal.style.display = 'none';
+                });
+            });
+            
+            // Booking buttons
+            bookBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const eventName = e.target.getAttribute('data-event');
+                    const eventPrice = parseInt(e.target.getAttribute('data-price'));
+                    currentEvent.name = eventName;
+                    currentEvent.price = eventPrice;
+                    
+                    document.getElementById('eventName').value = eventName;
+                    document.getElementById('bookingEvent').textContent = eventName;
+                    document.getElementById('bookingPrice').textContent = `IDR ${eventPrice.toLocaleString()}`;
+                    updateBookingSummary();
+                    
+                    showModal(bookingModal);
+                });
+            });
+            
+            // Ticket count change
+            ticketCount.addEventListener('change', () => {
+                currentEvent.tickets = parseInt(ticketCount.value);
+                updateBookingSummary();
+                resetSeatSelection();
+            });
+            
+            // Proceed to payment
+            proceedToPayment.addEventListener('click', () => {
+                if (validateBookingForm()) {
+                    document.getElementById('summaryEvent').textContent = currentEvent.name;
+                    document.getElementById('summaryTickets').textContent = currentEvent.tickets;
+                    document.getElementById('summaryTotal').textContent = `IDR ${(currentEvent.price * currentEvent.tickets).toLocaleString()}`;
+                    
+                    // Generate QR code
+                    generateQRCode();
+                    
+                    bookingModal.style.display = 'none';
+                    showModal(qrModal);
+                }
+            });
+            
+            // Confirm payment
+            confirmPayment.addEventListener('click', () => {
+                alert('Payment confirmed! Your tickets have been booked successfully.');
+                qrModal.style.display = 'none';
+            });
+            
+            // Tab switching
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabId = tab.getAttribute('data-tab');
+                    
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    
+                    tab.classList.add('active');
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+            
+            // Login form submission
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                
+                // Simple validation - in a real app, this would be a secure API call
+                if (username === 'admin' && password === 'password') {
+                    loginModal.style.display = 'none';
+                    showDashboard();
+                } else {
+                    alert('Invalid username or password. Try admin/password');
+                }
+            });
+        }
+
+        // Show/hide dashboard
+        function showDashboard() {
+            document.querySelector('header').style.display = 'none';
+            document.querySelector('.hero').style.display = 'none';
+            document.querySelector('section:not(.dashboard)').style.display = 'none';
+            document.querySelector('footer').style.display = 'none';
+            dashboard.style.display = 'block';
+            window.scrollTo(0, 0);
+        }
+
+        function hideDashboard() {
+            document.querySelector('header').style.display = 'block';
+            document.querySelector('.hero').style.display = 'block';
+            document.querySelector('section:not(.dashboard)').style.display = 'block';
+            document.querySelector('footer').style.display = 'block';
+            dashboard.style.display = 'none';
+        }
+
+        // Modal controls
+        function showModal(modal) {
+            modal.style.display = 'flex';
+        }
+
+        // Generate seats for selection
+        function generateSeats() {
+            seatSelection.innerHTML = '';
+            const rows = ['A', 'B', 'C', 'D', 'E'];
+            const seatsPerRow = 5;
+            
+            rows.forEach(row => {
+                for (let i = 1; i <= seatsPerRow; i++) {
+                    const seat = document.createElement('div');
+                    seat.className = 'seat';
+                    seat.textContent = `${row}${i}`;
+                    
+                    // Randomly mark some seats as occupied
+                    if (Math.random() > 0.7) {
+                        seat.classList.add('occupied');
+                    } else {
+                        seat.addEventListener('click', () => {
+                            if (seat.classList.contains('selected')) {
+                                seat.classList.remove('selected');
+                                const index = currentEvent.selectedSeats.indexOf(seat.textContent);
+                                if (index > -1) {
+                                    currentEvent.selectedSeats.splice(index, 1);
+                                }
+                            } else {
+                                if (currentEvent.selectedSeats.length < currentEvent.tickets) {
+                                    seat.classList.add('selected');
+                                    currentEvent.selectedSeats.push(seat.textContent);
+                                } else {
+                                    alert(`You can only select ${currentEvent.tickets} seat(s)`);
+                                }
+                            }
+                        });
+                    }
+                    
+                    seatSelection.appendChild(seat);
+                }
+            });
+        }
+
+        // Reset seat selection
+        function resetSeatSelection() {
+            currentEvent.selectedSeats = [];
+            const seats = document.querySelectorAll('.seat');
+            seats.forEach(seat => {
+                if (!seat.classList.contains('occupied')) {
+                    seat.classList.remove('selected');
+                }
+            });
+        }
+
+        // Update booking summary
+        function updateBookingSummary() {
+            document.getElementById('bookingTickets').textContent = currentEvent.tickets;
+            document.getElementById('bookingTotal').textContent = `IDR ${(currentEvent.price * currentEvent.tickets).toLocaleString()}`;
+        }
+
+        // Validate booking form
+        function validateBookingForm() {
+            const name = document.getElementById('customerName').value;
+            const email = document.getElementById('customerEmail').value;
+            const phone = document.getElementById('customerPhone').value;
+            
+            if (!name || !email || !phone) {
+                alert('Please fill in all required fields');
+                return false;
+            }
+            
+            if (currentEvent.selectedSeats.length !== currentEvent.tickets) {
+                alert(`Please select ${currentEvent.tickets} seat(s)`);
+                return false;
+            }
+            
+            return true;
+        }
+
+        // Generate QR code for payment
+        function generateQRCode() {
+            const qrCodeElement = document.getElementById('qrCode');
+            qrCodeElement.innerHTML = '';
+            
+            // In a real app, this would be a dynamic QRIS code
+            // For demo purposes, we're generating a simple QR code
+            const paymentData = {
+                event: currentEvent.name,
+                tickets: currentEvent.tickets,
+                amount: currentEvent.price * currentEvent.tickets,
+                seats: currentEvent.selectedSeats.join(', '),
+                timestamp: new Date().toISOString()
+            };
+            
+            QRCode.toCanvas(qrCodeElement, JSON.stringify(paymentData), function(error) {
+                if (error) console.error(error);
+            });
+        }
+
+        // Initialize charts
+        function initCharts() {
+            // Sales Chart
+            const salesCtx = document.getElementById('salesChart').getContext('2d');
+            const salesChart = new Chart(salesCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Ticket Sales',
+                        data: [12, 19, 15, 22, 18, 25],
+                        borderColor: '#8B4513',
+                        backgroundColor: 'rgba(139, 69, 19, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+            
+            // Payment Methods Chart
+            const paymentCtx = document.getElementById('paymentChart').getContext('2d');
+            const paymentChart = new Chart(paymentCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['QRIS', 'Credit Card', 'Bank Transfer', 'Cash'],
+                    datasets: [{
+                        data: [65, 15, 10, 10],
+                        backgroundColor: [
+                            '#8B4513',
+                            '#A0522D',
+                            '#CD853F',
+                            '#D2691E'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize the app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
